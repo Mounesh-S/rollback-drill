@@ -1,30 +1,17 @@
-// Temporary development preview: both layouts side by side for one seed.
-// Open /?seed=4821 to pick a seed. Replaced by the game flow in Phase E.
+// Entry point. Until the Flagsmith experiment is wired in (Phase F), live play shows the
+// control layout and events are only logged in development.
 
-import { generateIncident } from './game/generate.ts'
-import { DEFAULT_PACK } from './game/packs.ts'
+import { Game } from './Game.tsx'
+import type { EmitEvent } from './game/events.ts'
 import { Chronological } from './layouts/Chronological.tsx'
-import { Grouped } from './layouts/Grouped.tsx'
+import { parseMode } from './lib/mode.ts'
 
-const seed = Number(new URLSearchParams(location.search).get('seed') ?? 4821)
+const mode = parseMode(location.search)
+
+const devEmit: EmitEvent = (event) => {
+  if (import.meta.env.DEV) console.debug('[rollback-drill] event', event)
+}
 
 export default function App() {
-  const incident = generateIncident(seed, DEFAULT_PACK)
-  return (
-    <main style={{ maxWidth: 1200, margin: '0 auto', padding: 16 }}>
-      <h1>
-        Incident {incident.number}: {incident.headline}
-      </h1>
-      <div style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
-        <section>
-          <h2>Control: chronological</h2>
-          <Chronological incident={incident} />
-        </section>
-        <section>
-          <h2>Treatment: grouped by change</h2>
-          <Grouped incident={incident} />
-        </section>
-      </div>
-    </main>
-  )
+  return <Game mode={mode} timerSeconds={75} LiveEvidence={Chronological} emit={devEmit} />
 }
