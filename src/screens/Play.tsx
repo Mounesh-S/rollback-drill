@@ -57,7 +57,8 @@ export function Play({ incident, choices, msLeft, selectedId, evidence, onSelect
                   onChange={() => onSelect(c.id)}
                 />
                 <span>
-                  <strong>{c.id}</strong> · {KIND[c.kind]} · {c.title}
+                  <strong>{c.id}</strong>
+                  {KIND[c.kind]}
                 </span>
               </label>
             ))}

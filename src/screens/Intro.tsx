@@ -16,7 +16,7 @@ export function Intro({ timerSeconds, practice, onStart }: IntroProps) {
         have {timerSeconds} seconds to choose which one to roll back first.
       </p>
       <ol className="rules">
-        <li>You get one attempt. Only your first answer counts.</li>
+        <li>{practice ? 'Practice as often as you like.' : 'You get one attempt.'} Only your first answer counts.</li>
         <li>Stay on this tab until you answer.</li>
         <li>No outside help, please: no AI, no friends. We're testing the screen, not you.</li>
       </ol>

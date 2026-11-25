@@ -34,7 +34,7 @@
   border: 0;
   border-radius: var(--radius);
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   cursor: pointer;
   min-height: 48px;
 }
@@ -70,19 +70,22 @@
   bottom: 0;
   z-index: 2;
   margin-top: 20px;
-  padding: 14px 16px;
+  padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius) var(--radius) 0 0;
   background: var(--surface);
   box-shadow: 0 -6px 20px rgb(0 0 0 / 0.12);
 }
 .answer legend { font-weight: 700; padding: 0; margin-bottom: 8px; }
-.choices { display: grid; gap: 8px; border: 0; padding: 0; margin: 0 0 12px; }
+.choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; border: 0; padding: 0; margin: 0 0 10px; }
 .choice { display: block; cursor: pointer; }
 .choice input { position: absolute; opacity: 0; }
 .choice span {
-  display: block;
-  padding: 10px 12px;
+  display: grid;
+  gap: 2px;
+  text-align: center;
+  padding: 8px 6px;
+  font-size: 0.85rem;
   border: 2px solid var(--border);
   border-radius: var(--radius);
 }
