@@ -95,7 +95,7 @@ export function Drill({
       practice={practice}
       result={{ ...state, correct: score.correct }}
       onSelfReport={
-        state.ending === 'answered'
+        state.ending === 'answered' && !practice
           ? () => {
               if (sent.current.help) return
               sent.current.help = true

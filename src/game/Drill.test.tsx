@@ -109,3 +109,10 @@ test('answer choices include every change exactly once', () => {
   const radios = screen.getAllByRole('radio').map((r) => (r as HTMLInputElement).value)
   expect(radios.sort()).toEqual(incident.changes.map((c) => c.id).sort())
 })
+
+test('practice mode does not ask the honesty question', () => {
+  setup({ practice: true })
+  start()
+  answer(wrongId, 1_000)
+  expect(screen.queryByRole('button', { name: /i had help/i })).toBeNull()
+})
