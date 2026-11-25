@@ -10,6 +10,7 @@
   --muted: #5d5d66;
   --border: #dedde3;
   --accent: #5b3df5;
+  --on-accent: #ffffff;
   --failing: #b3261e;
   --failing-bg: #fdecea;
   --healthy: #1e6b3a;
@@ -26,6 +27,7 @@
     --muted: #a3a3ad;
     --border: #33333d;
     --accent: #9d8bff;
+    --on-accent: #120d26;
     --failing: #ffb4ab;
     --failing-bg: #3d1a17;
     --healthy: #8fd8a8;
