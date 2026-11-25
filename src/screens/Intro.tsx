@@ -8,24 +8,53 @@ interface IntroProps {
 
 export function Intro({ timerSeconds, practice, onStart }: IntroProps) {
   return (
-    <main className="screen">
-      {practice && <p className="banner">Practice mode: nothing is recorded.</p>}
-      <h1>Rollback Drill</h1>
-      <p className="lead">
-        Dinner rush. Orders are failing at some restaurants, and three changes shipped in the last half hour. You
-        have {timerSeconds} seconds to choose which one to roll back first.
-      </p>
-      <ol className="rules">
-        <li>{practice ? 'Practice as often as you like.' : 'You get one attempt.'} Only your first answer counts.</li>
-        <li>Stay on this tab until you answer.</li>
-        <li>No outside help, please: no AI, no friends. We're testing the screen, not you.</li>
-      </ol>
-      <button className="btn" type="button" onClick={onStart} autoFocus>
-        Start the {timerSeconds}-second drill
-      </button>
-      <p className="privacy">
-        Privacy: this browser stores a random ID so you get one attempt. No name, email or tracking cookies.
-      </p>
-    </main>
+    <>
+      <header className="topbar">
+        <span className="brand">ROLLBACK DRILL</span>
+        <span className="dim">on-call simulator</span>
+      </header>
+      <main className="screen">
+        {practice && <p className="banner">PRACTICE MODE · nothing is recorded</p>}
+        <section className="page" aria-label="Incoming page">
+          <div className="page-meta">
+            <span className="sev">SEV2</span>
+            <span className="label">PAGE · FOOD-DELIVERY PLATFORM · DINNER RUSH</span>
+          </div>
+          <h1>Orders are failing at some restaurants. You're on call.</h1>
+          <p>
+            Three changes went out in the last 30 minutes. You have {timerSeconds} seconds to pick the one to roll
+            back first.
+          </p>
+        </section>
+
+        <dl className="rules">
+          <div>
+            <dt>ATTEMPTS</dt>
+            <dd>{practice ? 'Unlimited in practice.' : 'One.'} Your first answer is final.</dd>
+          </div>
+          <div>
+            <dt>FOCUS</dt>
+            <dd>Stay on this tab until you answer.</dd>
+          </div>
+          <div>
+            <dt>HELP</dt>
+            <dd>None. No AI, no colleagues. We're testing the screen, not you.</dd>
+          </div>
+          <div>
+            <dt>KEYS</dt>
+            <dd>
+              <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> pick a change, <kbd>Enter</kbd> rolls it back.
+            </dd>
+          </div>
+        </dl>
+
+        <button className="btn" type="button" onClick={onStart} autoFocus>
+          Acknowledge and start
+        </button>
+        <p className="fine">
+          This browser keeps a random ID so you get one attempt. No name, no email, no tracking cookies.
+        </p>
+      </main>
+    </>
   )
 }

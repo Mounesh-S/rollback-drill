@@ -59,7 +59,7 @@ test('correct answer emits decision time and the primary metric', () => {
     { name: EVENT.decisionSubmitted, value: 38_000 },
     { name: EVENT.correctFirstRollback },
   ])
-  expect(screen.getByRole('heading', { name: /right call/i })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: /rollback correct/i })).toBeInTheDocument()
   expect(onDone).toHaveBeenCalledOnce()
 })
 
@@ -68,7 +68,7 @@ test('wrong answer emits only the decision', () => {
   start()
   answer(wrongId, 5_000)
   expect(names(emit)).toEqual([EVENT.decisionSubmitted])
-  expect(screen.getByRole('heading', { name: /not that one/i })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: /wrong rollback/i })).toBeInTheDocument()
 })
 
 test('leaving the tab is reported once and voids the primary metric', () => {
@@ -79,7 +79,7 @@ test('leaving the tab is reported once and voids the primary metric', () => {
   fireEvent(document, new Event('visibilitychange'))
   answer(incident.culpritId, 10_000)
   expect(names(emit)).toEqual([EVENT.tabLeft, EVENT.decisionSubmitted])
-  expect(screen.getByText(/doesn't count/i)).toBeInTheDocument()
+  expect(screen.getByText(/left the tab/i)).toBeInTheDocument()
 })
 
 test('time running out ends the round with no events', () => {
@@ -90,7 +90,7 @@ test('time running out ends the round with no events', () => {
     now = 75_000
     vi.advanceTimersByTime(400)
   })
-  expect(screen.getByRole('heading', { name: /time ran out/i })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: /timed out/i })).toBeInTheDocument()
   expect(emit).not.toHaveBeenCalled()
 })
 
@@ -115,4 +115,16 @@ test('practice mode does not ask the honesty question', () => {
   start()
   answer(wrongId, 1_000)
   expect(screen.queryByRole('button', { name: /i had help/i })).toBeNull()
+})
+
+test('keys 1-3 pick a change and Enter rolls it back', () => {
+  const { emit } = setup()
+  start()
+  const radios = screen.getAllByRole('radio') as HTMLInputElement[]
+  const index = radios.findIndex((r) => r.value === incident.culpritId)
+  fireEvent.keyDown(window, { key: String(index + 1) })
+  expect(radios[index]!.checked).toBe(true)
+  now = 9_000
+  fireEvent.keyDown(window, { key: 'Enter' })
+  expect(names(emit)).toEqual([EVENT.decisionSubmitted, EVENT.correctFirstRollback])
 })

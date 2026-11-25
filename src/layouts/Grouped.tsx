@@ -16,16 +16,18 @@ export function Grouped({ incident }: { incident: Incident }) {
       {incident.changes.map((change) => {
         const signals = incident.signals.filter((s) => change.targets.includes(s.restaurantId))
         return (
-          <section key={change.id} className="group" aria-label={`Change ${change.id}`}>
-            <ChangeHeader change={change} />
-            <h3>Restaurants this change reached</h3>
-            <ul className="target-list">
+          <section key={change.id} className="grp" aria-label={`Change ${change.id}`}>
+            <div className="grp-head">
+              <ChangeHeader change={change} />
+            </div>
+            <h3 className="grp-label">REACHED</h3>
+            <ul className="tree">
               {change.targets.map((id) => (
                 <TargetStatus key={id} restaurant={getRestaurant(incident, id)} status={status.get(id) ?? 'no-signal'} />
               ))}
             </ul>
-            <h3>Signals from those restaurants</h3>
-            <ul className="signal-list">
+            <h3 className="grp-label">SIGNALS FROM THESE RESTAURANTS</h3>
+            <ul className="grp-sigs">
               {signals.map((s) => (
                 <SignalRow key={s.id} signal={s} restaurant={getRestaurant(incident, s.restaurantId)} />
               ))}
@@ -35,9 +37,9 @@ export function Grouped({ incident }: { incident: Incident }) {
       })}
 
       {unrelated.length > 0 && (
-        <section className="group" aria-label="Restaurants not reached by any change">
-          <h3>Restaurants no recent change reached</h3>
-          <ul className="signal-list">
+        <section className="grp" aria-label="Restaurants not reached by any change">
+          <h3 className="grp-label">NOT REACHED BY ANY CHANGE</h3>
+          <ul className="grp-sigs">
             {unrelated.map((s) => (
               <SignalRow key={s.id} signal={s} restaurant={getRestaurant(incident, s.restaurantId)} />
             ))}

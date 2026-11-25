@@ -1,4 +1,4 @@
-// Control layout: every change and signal in one feed, oldest first.
+// Control layout: every change and signal in one log, oldest first.
 // This is how most incident timelines look today.
 
 import { Fragment } from 'react'
@@ -20,10 +20,10 @@ export function Chronological({ incident }: { incident: Incident }) {
     <ol className="evidence" data-layout="chronological" aria-label="Events in time order">
       {items.map((item) =>
         item.change ? (
-          <li key={item.change.id} className="feed-change">
+          <li key={item.change.id} className="log-row log-change">
             <ChangeHeader change={item.change} />
-            <p className="targets-line">
-              Rolled out to:{' '}
+            <p className="rollout">
+              <span className="rollout-label">ROLLED OUT TO</span>
               {item.change.targets.map((id, i) => (
                 <Fragment key={id}>
                   {i > 0 && ', '}
@@ -35,6 +35,7 @@ export function Chronological({ incident }: { incident: Incident }) {
         ) : (
           <SignalRow
             key={item.signal.id}
+            className="log-row"
             signal={item.signal}
             restaurant={getRestaurant(incident, item.signal.restaurantId)}
           />

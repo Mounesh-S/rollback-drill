@@ -1,39 +1,25 @@
-/* Design tokens. Status is never shown by colour alone: icons and text always accompany it. */
+/* On-call console theme. Dark only: this is a 2 AM tool. Status is never colour alone. */
 :root {
-  color-scheme: light dark;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: dark;
+  --bg: #0a0c0d;
+  --panel: #101416;
+  --panel-2: #151b1e;
+  --line: #232b30;
+  --line-strong: #36424a;
+  --text: #dfe6ea;
+  --dim: #8b989f;
+  --amber: #ffb224;
+  --on-amber: #1a1200;
+  --red: #ff6b63;
+  --red-bg: #2a1513;
+  --green: #45d98c;
+  --green-bg: #0f241a;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  font-family: var(--sans);
+  font-size: 15px;
   line-height: 1.45;
-
-  --bg: #f7f7f5;
-  --surface: #ffffff;
-  --text: #1b1b1f;
-  --muted: #5d5d66;
-  --border: #dedde3;
-  --accent: #5b3df5;
-  --on-accent: #ffffff;
-  --failing: #b3261e;
-  --failing-bg: #fdecea;
-  --healthy: #1e6b3a;
-  --healthy-bg: #e7f4ec;
-  --neutral-bg: #efeef3;
-  --radius: 10px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #121216;
-    --surface: #1c1c22;
-    --text: #ececf1;
-    --muted: #a3a3ad;
-    --border: #33333d;
-    --accent: #9d8bff;
-    --on-accent: #120d26;
-    --failing: #ffb4ab;
-    --failing-bg: #3d1a17;
-    --healthy: #8fd8a8;
-    --healthy-bg: #15301f;
-    --neutral-bg: #2a2a33;
-  }
 }
 
 * { box-sizing: border-box; }
@@ -42,7 +28,10 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
+  -webkit-font-smoothing: antialiased;
 }
+
+code, time, .mono { font-family: var(--mono); }
 
 .visually-hidden {
   position: absolute;
@@ -52,6 +41,8 @@ body {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
