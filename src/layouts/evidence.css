@@ -1,0 +1,92 @@
+/* Shared by both layouts. Mobile first: one column, then roomier on wide screens. */
+
+.evidence {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.change-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.kind {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--neutral-bg);
+}
+
+.change-id { font-weight: 700; }
+.change-title { flex-basis: 100%; }
+.meta, .area, .clock { color: var(--muted); font-size: 0.85rem; }
+.clock { font-variant-numeric: tabular-nums; }
+.area { margin-left: 4px; }
+
+.signal {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 2px 8px;
+  align-items: baseline;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+}
+.signal-message { grid-column: 3; color: var(--muted); }
+.signal-error { background: var(--failing-bg); }
+.signal-healthy { background: var(--healthy-bg); }
+.signal-error .signal-icon { color: var(--failing); font-weight: 700; }
+.signal-healthy .signal-icon { color: var(--healthy); font-weight: 700; }
+
+/* Chronological feed */
+.feed-change {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.targets-line { margin: 8px 0 0; font-size: 0.9rem; }
+
+/* Grouped view */
+.group {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  display: grid;
+  gap: 10px;
+}
+.group h3 { margin: 0; font-size: 0.95rem; }
+.target-list, .signal-list {
+  display: grid;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.target {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  background: var(--neutral-bg);
+}
+.target-failing { background: var(--failing-bg); }
+.target-healthy { background: var(--healthy-bg); }
+.status-text { margin-left: auto; font-size: 0.8rem; font-weight: 600; }
+.target-failing .status-text { color: var(--failing); }
+.target-healthy .status-text { color: var(--healthy); }
+
+@media (min-width: 720px) {
+  .evidence { gap: 14px; }
+  .change-title { flex-basis: auto; }
+}
