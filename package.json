@@ -11,7 +11,8 @@
     "test": "vitest run",
     "typecheck": "tsc -b",
     "check": "npm run typecheck && npm run lint && npm test",
-    "validate-scenarios": "node scripts/validate-scenarios.ts"
+    "validate-scenarios": "node scripts/validate-scenarios.ts",
+    "simulate": "node scripts/simulate.ts"
   },
   "dependencies": {
     "@flagsmith/flagsmith": "12.6.0",
