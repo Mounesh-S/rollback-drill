@@ -1,2 +1,56 @@
-:root { color-scheme: light dark; font-family: system-ui, sans-serif; }
-body { margin: 0; }
+/* Design tokens. Status is never shown by colour alone: icons and text always accompany it. */
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.45;
+
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --text: #1b1b1f;
+  --muted: #5d5d66;
+  --border: #dedde3;
+  --accent: #5b3df5;
+  --failing: #b3261e;
+  --failing-bg: #fdecea;
+  --healthy: #1e6b3a;
+  --healthy-bg: #e7f4ec;
+  --neutral-bg: #efeef3;
+  --radius: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121216;
+    --surface: #1c1c22;
+    --text: #ececf1;
+    --muted: #a3a3ad;
+    --border: #33333d;
+    --accent: #9d8bff;
+    --failing: #ffb4ab;
+    --failing-bg: #3d1a17;
+    --healthy: #8fd8a8;
+    --healthy-bg: #15301f;
+    --neutral-bg: #2a2a33;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
