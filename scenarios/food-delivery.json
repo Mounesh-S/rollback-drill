@@ -1,0 +1,58 @@
+{
+  "id": "food-delivery",
+  "name": "Food delivery: dinner rush",
+  "platform": "Fictional food-delivery platform",
+  "restaurants": [
+    { "name": "Saffron Spoon", "area": "Indiranagar" },
+    { "name": "Dosa Dock", "area": "Jayanagar" },
+    { "name": "Green Bowl Kitchen", "area": "Koramangala" },
+    { "name": "Tandoor Lane", "area": "Whitefield" },
+    { "name": "Noodle Nook", "area": "HSR Layout" },
+    { "name": "Biryani Box", "area": "Malleshwaram" },
+    { "name": "Pizza Pilot", "area": "Hebbal" },
+    { "name": "Taco Terrace", "area": "Marathahalli" },
+    { "name": "Curry Corner", "area": "BTM Layout" },
+    { "name": "Burger Bay", "area": "Electronic City" },
+    { "name": "Falafel Folk", "area": "Basavanagudi" },
+    { "name": "Momo Mile", "area": "Yelahanka" },
+    { "name": "Paneer Palace", "area": "Rajajinagar" },
+    { "name": "Wrap Republic", "area": "Bellandur" },
+    { "name": "Idli Inn", "area": "Banashankari" },
+    { "name": "Kebab Crate", "area": "Frazer Town" }
+  ],
+  "services": ["order-service", "menu-service", "payments-gateway", "dispatch-service", "pricing-service"],
+  "authors": ["@asha", "@ravi", "@lena", "@tomas", "@meera", "@kofi"],
+  "flagNames": ["new_checkout_flow", "smart_eta", "combo_upsell", "instant_refunds", "live_tracking_v2"],
+  "headlines": [
+    "Orders stuck at \"confirming\" for some restaurants",
+    "Checkout failing for some restaurants during dinner rush",
+    "Customers can't place orders at some restaurants"
+  ],
+  "errorMessages": [
+    "Order confirmation timed out (504)",
+    "Checkout failed: upstream returned 502",
+    "Payment authorisation rejected (500)",
+    "Order stuck in CONFIRMING for over 3 minutes"
+  ],
+  "healthyMessages": [
+    "Orders flowing normally",
+    "Checkout success rate 99.6%",
+    "No errors in the last 5 minutes",
+    "Order confirmations within normal latency"
+  ],
+  "changeTitles": {
+    "deploy": [
+      "Deploy {service} v{version} to the pilot restaurants",
+      "Canary release of {service} v{version}"
+    ],
+    "flag_rollout": [
+      "Turn on {flag} for selected restaurants",
+      "Roll out {flag} to the next restaurant group"
+    ],
+    "config_change": [
+      "Lower {service} request timeout from 30s to 5s",
+      "Reduce {service} connection pool from 50 to 10",
+      "Point {service} at the new cache cluster"
+    ]
+  }
+}
