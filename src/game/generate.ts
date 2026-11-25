@@ -73,7 +73,7 @@ export function generateIncident(seed: number, pack: ScenarioPack): Incident {
 
   return {
     seed,
-    number: `#${String(seed % 10000).padStart(4, '0')}`,
+    number: `INC-${String(seed % 10000).padStart(4, '0')}`,
     packId: pack.id,
     platform: pack.platform,
     headline: pick(rng, pack.headlines),
