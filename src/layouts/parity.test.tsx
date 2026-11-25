@@ -37,7 +37,7 @@ test('both layouts show exactly the same evidence for 500 seeds', () => {
       expect(treatment.text).toContain(text)
     }
   }
-})
+}, 30_000) // renders 1000 layouts; slow when the suite runs in parallel
 
 test('neither layout gives away the answer', () => {
   for (let seed = 1; seed <= 100; seed++) {
