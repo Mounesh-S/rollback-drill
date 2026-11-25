@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc -b",
-    "check": "npm run typecheck && npm run lint && npm test"
+    "check": "npm run typecheck && npm run lint && npm test",
+    "validate-scenarios": "node scripts/validate-scenarios.ts"
   },
   "dependencies": {
     "@flagsmith/flagsmith": "12.6.0",
