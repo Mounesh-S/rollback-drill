@@ -48,7 +48,10 @@ export function LiveGate({ mode }: { mode: Mode }) {
     const id = setTimeout(() => setTimedOut(true), CONNECT_TIMEOUT_MS)
     return () => clearTimeout(id)
   }, [])
-  const emit = useMemo(() => flagsmithEmitter(client, (e) => setSent((s) => [...s, e])), [client])
+  const emit = useMemo(
+    () => flagsmithEmitter(client, import.meta.env.DEV ? (e) => setSent((s) => [...s, e]) : undefined),
+    [client],
+  )
 
   const fromServer = loading?.source === 'SERVER' && !loading.isLoading
   const practiceLink = (
