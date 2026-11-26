@@ -25,3 +25,9 @@ Every change to flags, metrics, experiments and timing, with the reason. Times a
 - **Known-effect result** (experiment 488): primary 40.9% vs 57.6%, 96.9% chance to beat control; guardrails fine.
 - **Ship rehearsal:** completed 488 with `{"rollout_decision":"variant","rollout_variant":36823}`; every new identity received `grouped`. Shipping sets the variant weight to 100%.
 - **Development reset** to control with `flagsmith flag update incident_evidence_layout --weight grouped=0`.
+
+## 2026-11-26
+
+- **Independent review** before launch found a timing shortcut in the generator (culprit always the middle change), second-tab answer leaks and retries, and a weak tab-leave rule. All fixed before any real data; see the amendments in PREREGISTRATION.md.
+- **Production:** created metric 562 `self_reported_help` (informational), deleted the unstarted, empty experiment 489 and created **experiment 567** with five metrics. Not started.
+- **Deployed** to Vercel (Production key on the live site, Development key on previews).

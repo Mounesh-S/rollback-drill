@@ -23,7 +23,7 @@ event flushes: the exposure on Start, `decision_submitted` and `correct_first_ro
 | decision_time_ms | 190 | 211 | -7.4% | **95.5%**: false positive |
 | tab_left | 190 | 211 | -28% | 79.8% |
 
-**Pass.** The primary metric did not produce a false winner. A secondary metric crossed 95% by
+**Pass.** The primary metric did not produce a false winner. The control count is 190, one more than the 189 simulated control players, because the live browser check above (one real round by the developer) was in the same experiment. A secondary metric crossed 95% by
 chance, which is why the pre-registration lets only the primary metric decide.
 Raw: [aa-1-results.json](validation/aa-1-results.json)
 
@@ -49,6 +49,17 @@ the Production experiment, confirm enrolment with a probe identity before sharin
 Experiment 488 was completed with `rollout_decision: "variant"` and the `grouped` variant. New
 identities immediately received `grouped` (the variant weight became 100%). Development was then reset
 to the control layout (weight 0) for the pilot.
+
+## 5. Sample-ratio check
+
+`npm run srm -- docs/validation/<file>.json`: A/A 190 vs 211, p = 0.29; known effect 88 vs 99,
+p = 0.42. No mismatch (threshold p < 0.01). Flagsmith itself returned `srm_p_value: null`.
+
+## Note on the generator change
+
+These runs validate the Flagsmith pipeline with simulated players and do not depend on incident
+content. They were run before the incident generator was changed to remove timing shortcuts
+(see the pre-registration amendments); the pipeline is unaffected.
 
 ## What this shows
 
