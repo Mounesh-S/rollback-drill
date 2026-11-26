@@ -128,3 +128,9 @@ test('keys 1-3 pick a change and Enter rolls it back', () => {
   fireEvent.keyDown(window, { key: 'Enter' })
   expect(names(emit)).toEqual([EVENT.decisionSubmitted, EVENT.correctFirstRollback])
 })
+
+test('Enter starts the drill from the intro', () => {
+  setup()
+  fireEvent.keyDown(window, { key: 'Enter' })
+  expect(screen.getByTestId('evidence')).toBeInTheDocument()
+})

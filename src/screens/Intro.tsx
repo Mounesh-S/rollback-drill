@@ -1,3 +1,4 @@
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import './screens.css'
 
 interface IntroProps {
@@ -7,6 +8,19 @@ interface IntroProps {
 }
 
 export function Intro({ timerSeconds, practice, onStart }: IntroProps) {
+  // Enter starts the drill even when the button doesn't have focus (e.g. a freshly opened tab).
+  const start = useRef(onStart)
+  useLayoutEffect(() => {
+    start.current = onStart
+  })
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement || e.target instanceof HTMLAnchorElement)) start.current()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   return (
     <>
       <header className="topbar">
@@ -43,7 +57,7 @@ export function Intro({ timerSeconds, practice, onStart }: IntroProps) {
           <div>
             <dt>KEYS</dt>
             <dd>
-              <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> pick a change, <kbd>Enter</kbd> rolls it back.
+              <kbd>Enter</kbd> starts. <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> pick a change, <kbd>Enter</kbd> rolls it back.
             </dd>
           </div>
         </dl>
