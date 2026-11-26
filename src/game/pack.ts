@@ -1,5 +1,5 @@
 // Scenario packs: the reusable part of the drill kit. A pack is plain JSON, so a team
-// can write its own incidents without touching code. See scenarios/README.md.
+// can write its own incidents as JSON and register them in packs.ts. See scenarios/README.md.
 
 import { CHANGE_KINDS, type ChangeKind } from './types.ts'
 
