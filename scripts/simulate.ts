@@ -1,5 +1,5 @@
 // Sends simulated players through the real Flagsmith SDK to validate the pipeline.
-// DEVELOPMENT ONLY: it refuses the Production key. Simulated data is never reported as
+// DEVELOPMENT ONLY: it refuses any key not on the Development allowlist. Simulated data is never reported as
 // experiment results.
 //
 //   SIM_ENV_KEY=<dev key> node scripts/simulate.ts --run aa-1 --users 300 --control 0.5 --treatment 0.5
@@ -10,7 +10,8 @@ import { EVENT } from '../src/game/events.ts'
 import { FLAG, LAYOUT_TREATMENT_VARIANT } from '../src/flags/config.ts'
 import { simulatePlayer, type Arm, type SimRates } from './sim-model.ts'
 
-const PRODUCTION_KEYS = new Set(['hazUACDUc9pgPkpJdrEiiS'])
+// Allowlist, not denylist: simulated traffic may only ever go to these environments.
+const DEVELOPMENT_KEYS = new Set(['GvtEUtEy3rG2h6riwpdmeo'])
 
 const { values } = parseArgs({
   options: {
@@ -24,7 +25,7 @@ const { values } = parseArgs({
 
 const envKey = process.env.SIM_ENV_KEY ?? ''
 if (!envKey) throw new Error('Set SIM_ENV_KEY to the Development client-side key.')
-if (PRODUCTION_KEYS.has(envKey)) throw new Error('Refusing to simulate traffic in Production.')
+if (!DEVELOPMENT_KEYS.has(envKey)) throw new Error('Refusing: SIM_ENV_KEY is not an allowlisted Development key.')
 if (!values.run || !/^[a-z0-9-]{2,32}$/.test(values.run)) throw new Error('Pass --run <label>, e.g. --run aa-1')
 
 const users = Number(values.users)
