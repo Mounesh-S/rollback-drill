@@ -66,7 +66,8 @@ export function Intro({ timerSeconds, practice, onStart }: IntroProps) {
           Acknowledge and start
         </button>
         <p className="fine">
-          This browser keeps a random ID so you get one attempt. No name, no email, no tracking cookies.
+          This browser keeps a random ID so you get one attempt. Your answer and timing are sent to Flagsmith under that
+          ID for the experiment. No name, no email, no tracking cookies.
         </p>
       </main>
     </>
