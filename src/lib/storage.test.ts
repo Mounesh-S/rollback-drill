@@ -1,7 +1,10 @@
 import { beforeEach, expect, test, vi } from 'vitest'
-import { getPlayerId, isRunningElsewhere, loadAttempt, resolveAbandoned, saveAttempt, type AttemptRecord } from './storage.ts'
+import { getPlayerId, isRunningElsewhere, markThisTabPlaying, thisTabWasPlaying, loadAttempt, resolveAbandoned, saveAttempt, type AttemptRecord } from './storage.ts'
 
-beforeEach(() => localStorage.clear())
+beforeEach(() => {
+  localStorage.clear()
+  sessionStorage.clear()
+})
 
 const record: AttemptRecord = {
   seed: 7,
@@ -63,4 +66,11 @@ test('falls back to getRandomValues when randomUUID is unavailable', () => {
   } finally {
     Object.defineProperty(crypto, 'randomUUID', { value: original, configurable: true })
   }
+})
+
+test('remembers which tab was playing', () => {
+  expect(thisTabWasPlaying(7)).toBe(false)
+  markThisTabPlaying(7)
+  expect(thisTabWasPlaying(7)).toBe(true)
+  expect(thisTabWasPlaying(8)).toBe(false)
 })

@@ -83,3 +83,23 @@ export function resolveAbandoned(record: AttemptRecord): AttemptRecord {
 export function isRunningElsewhere(record: AttemptRecord, now: number, limitMs: number): boolean {
   return record.status === 'in-progress' && typeof record.startedAt === 'number' && now - record.startedAt < limitMs + 5000
 }
+
+// sessionStorage survives a reload but is private to one tab, so it tells "this tab reloaded
+// mid-round" (abandoned) apart from "another tab is playing right now".
+const THIS_TAB_PLAYING = 'rollback-drill:v1:this-tab-playing'
+
+export function markThisTabPlaying(seed: number): void {
+  try {
+    sessionStorage.setItem(THIS_TAB_PLAYING, String(seed))
+  } catch {
+    // Without sessionStorage a reload is treated like another tab until the time runs out.
+  }
+}
+
+export function thisTabWasPlaying(seed: number): boolean {
+  try {
+    return sessionStorage.getItem(THIS_TAB_PLAYING) === String(seed)
+  } catch {
+    return false
+  }
+}
