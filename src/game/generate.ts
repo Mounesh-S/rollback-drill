@@ -1,13 +1,15 @@
 // Builds one incident from a seed. Every incident has the same shape and difficulty:
 //
-//   culprit   reached both failing restaurants + 1 silent one        (the right answer)
-//   wrong A   reached failing A + 1 healthy + 1 silent               (wrong)
-//   wrong B   reached failing B + 1 healthy + 1 silent               (wrong)
+//   culprit   reached failing A + failing B + 1 silent       (the right answer)
+//   wrong A   reached failing A + shared healthy + 1 silent  (wrong)
+//   wrong B   reached failing B + shared healthy + 1 silent  (wrong)
 //
-// Only the culprit covers every failing restaurant and no healthy one. Each change is placed
-// at random in the oldest, middle or newest time slot, so timing alone never gives the answer
-// (the newest wrong change is a natural recency trap). Every change reaches a silent
-// restaurant, so "the one with no signal" is not a shortcut either.
+// Only the culprit covers every failing restaurant and no healthy one. The structure is
+// deliberately symmetric so nothing but the signals gives the answer:
+// - every pair of changes shares exactly one restaurant, so "the hub" is not a tell;
+// - every change reaches one silent restaurant;
+// - time slots (oldest, middle, newest) and change types are dealt at random;
+// - restaurant and signal ids are assigned without regard to role.
 
 import type { ScenarioPack } from './pack.ts'
 import { RESTAURANTS_PER_INCIDENT } from './pack.ts'
@@ -35,10 +37,13 @@ function makeChange(rng: Rng, pack: ScenarioPack, kind: ChangeKind, at: number, 
 export function generateIncident(seed: number, pack: ScenarioPack): Incident {
   const rng = mulberry32(seed)
 
-  const restaurants: Restaurant[] = shuffle(rng, pack.restaurants)
+  // Roles are taken by position; ids come from a separate shuffle so they never reveal a role.
+  const idOrder = shuffle(rng, Array.from({ length: RESTAURANTS_PER_INCIDENT }, (_, i) => i + 1))
+  const picked: Restaurant[] = shuffle(rng, pack.restaurants)
     .slice(0, RESTAURANTS_PER_INCIDENT)
-    .map((r, i) => ({ id: `r${i + 1}`, name: r.name, area: r.area }))
-  const [failA, failB, ok1, ok2, quiet1, quiet2, quiet3, extra1, extra2] = restaurants as [
+    .map((r, i) => ({ id: `r${idOrder[i]}`, name: r.name, area: r.area }))
+  const restaurants = [...picked].sort((a, b) => Number(a.id.slice(1)) - Number(b.id.slice(1)))
+  const [failA, failB, okShared, quiet1, quiet2, quiet3, extra1, extra2, extra3] = picked as [
     Restaurant, Restaurant, Restaurant, Restaurant, Restaurant, Restaurant, Restaurant, Restaurant, Restaurant,
   ]
 
@@ -52,27 +57,29 @@ export function generateIncident(seed: number, pack: ScenarioPack): Incident {
   const [culpritKind, wrongAKind, wrongBKind] = shuffle(rng, CHANGE_KINDS) as [ChangeKind, ChangeKind, ChangeKind]
   const ids = new Set<string>()
   const culprit = makeChange(rng, pack, culpritKind, culpritAt, shuffle(rng, [failA, failB, quiet1]), ids)
-  const wrongA = makeChange(rng, pack, wrongAKind, wrongAAt, shuffle(rng, [failA, ok1, quiet2]), ids)
-  const wrongB = makeChange(rng, pack, wrongBKind, wrongBAt, shuffle(rng, [failB, ok2, quiet3]), ids)
+  const wrongA = makeChange(rng, pack, wrongAKind, wrongAAt, shuffle(rng, [failA, okShared, quiet2]), ids)
+  const wrongB = makeChange(rng, pack, wrongBKind, wrongBAt, shuffle(rng, [failB, okShared, quiet3]), ids)
 
   // One consistent symptom per incident, like a real outage.
   const symptom = pick(rng, pack.errorMessages)
-  let n = 0
-  const signal = (type: Signal['type'], at: number, r: Restaurant): Signal => ({
-    id: `sig-${++n}`,
+  const signal = (type: Signal['type'], at: number, r: Restaurant): Omit<Signal, 'id'> => ({
     type,
     at,
     restaurantId: r.id,
     message: type === 'error' ? symptom : pick(rng, pack.healthyMessages),
   })
-  const signals: Signal[] = [
+  const unordered = [
     signal('error', onset, failA),
     signal('error', onset + 1, failB),
     signal('error', onset + 2, failA),
     signal('error', onset + 3, failB),
-    // Each reached healthy restaurant reports twice; two unreached ones report once.
-    ...shuffle(rng, [ok1, ok1, ok2, ok2, extra1, extra2]).map((r, i) => signal('healthy', onset + 1 + (i % 4), r)),
-  ].sort((a, b) => a.at - b.at || a.id.localeCompare(b.id))
+    // The shared healthy restaurant and one unreached one report twice, two others once.
+    ...shuffle(rng, [okShared, okShared, extra1, extra1, extra2, extra3]).map((r, i) => signal('healthy', onset + 1 + (i % 4), r)),
+  ]
+  // Time order, ties in random order; ids follow display order, so they carry no extra information.
+  const signals: Signal[] = shuffle(rng, unordered)
+    .sort((a, b) => a.at - b.at)
+    .map((sig, i) => ({ id: `sig-${i + 1}`, ...sig }))
 
   return {
     seed,

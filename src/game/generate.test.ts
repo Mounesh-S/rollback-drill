@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest'
 import { formatClock, generateIncident } from './generate.ts'
 import { PACKS } from './packs.ts'
 import { viableChanges } from './solver.ts'
-import { evidenceIds } from './types.ts'
+import { evidenceIds, type Change } from './types.ts'
 
 const SEEDS = Array.from({ length: 1000 }, (_, i) => (i * 2654435761) >>> 0)
 
@@ -47,21 +47,38 @@ describe.each(PACKS.map((p) => [p.id, p] as const))('pack %s', (_id, pack) => {
   })
 
   test('no shortcut beats reading the evidence', () => {
-    // Accuracy of lazy strategies over many incidents. Each should be close to chance (1/3).
-    const silent = (inc: ReturnType<typeof generateIncident>, id: string) =>
-      !inc.signals.some((s) => s.restaurantId === id)
-    const strategies: Record<string, (inc: ReturnType<typeof generateIncident>) => string> = {
+    // Strategies that never look at which restaurants are failing or healthy. Each must stay
+    // close to chance (1/3); the threshold leaves room for sampling noise over 1000 seeds.
+    type Inc = ReturnType<typeof generateIncident>
+    const overlaps = (inc: Inc, id: string) =>
+      inc.changes.filter((o) => o.id !== id && o.targets.some((t) => inc.changes.find((c) => c.id === id)!.targets.includes(t))).length
+    const idSum = (inc: Inc, id: string) => inc.changes.find((c) => c.id === id)!.targets.reduce((n, t) => n + Number(t.slice(1)), 0)
+    const lowestBy = (inc: Inc, score: (id: string) => number) =>
+      [...inc.changes].sort((a, b) => score(a.id) - score(b.id))[0]!.id
+    const strategies: Record<string, (inc: Inc) => string> = {
       newest: (inc) => inc.changes[2]!.id,
       middle: (inc) => inc.changes[1]!.id,
       oldest: (inc) => inc.changes[0]!.id,
-      'reached a silent restaurant': (inc) => inc.changes.find((c) => c.targets.some((t) => silent(inc, t)))!.id,
+      'overlaps the most other changes (hub)': (inc) => lowestBy(inc, (id) => -overlaps(inc, id)),
+      'lowest restaurant ids': (inc) => lowestBy(inc, (id) => idSum(inc, id)),
+      'highest restaurant ids': (inc) => lowestBy(inc, (id) => -idSum(inc, id)),
+      'lowest change id': (inc) => lowestBy(inc, (id) => Number(id.slice(4))),
     }
     for (const [name, pickChange] of Object.entries(strategies)) {
       const hits = SEEDS.filter((seed) => {
         const inc = generateIncident(seed, pack)
         return pickChange(inc) === inc.culpritId
       }).length
-      expect(hits / SEEDS.length, name).toBeLessThan(0.42)
+      expect(hits / SEEDS.length, name).toBeLessThan(0.4)
+    }
+  })
+
+  test('every pair of changes shares exactly one restaurant', () => {
+    for (const seed of SEEDS.slice(0, 300)) {
+      const [a, b, c] = generateIncident(seed, pack).changes as [Change, Change, Change]
+      for (const [x, y] of [[a, b], [a, c], [b, c]] as const) {
+        expect(x.targets.filter((t) => y.targets.includes(t))).toHaveLength(1)
+      }
     }
   })
 
