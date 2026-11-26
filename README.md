@@ -54,8 +54,9 @@ rule and limitations were committed before launch: [docs/PREREGISTRATION.md](doc
 
 ## Results
 
-The live experiment runs from Nov 26 to Nov 29, 2026 (12:00 IST). Real-player results, the
-verdict and the rollout decision will be published here.
+**Live now:** Flagsmith experiment 567 started on Nov 26, 2026 at 21:17 IST and collects data until
+Nov 29, 2026, 12:00 IST. Real-player results, the verdict and the rollout decision will be published
+here. Code is frozen at tag [`experiment-v1`](https://github.com/Mounesh-S/rollback-drill/tree/experiment-v1).
 
 Before launch, the whole pipeline was validated with simulated players in a separate Development
 environment ([docs/VALIDATION.md](docs/VALIDATION.md)):

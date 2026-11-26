@@ -31,3 +31,6 @@ Every change to flags, metrics, experiments and timing, with the reason. Times a
 - **Independent review** before launch found a timing shortcut in the generator (culprit always the middle change), second-tab answer leaks and retries, and a weak tab-leave rule. All fixed before any real data; see the amendments in PREREGISTRATION.md.
 - **Production:** created metric 562 `self_reported_help` (informational), deleted the unstarted, empty experiment 489 and created **experiment 567** with five metrics. Not started.
 - **Deployed** to Vercel (Production key on the live site, Development key on previews).
+- **Launch, 21:17 IST:** code frozen with git tag `experiment-v1`; **Production experiment 567 started** (`started_at` 2026-11-26T15:47:38Z). Pre-launch checks: flags `game_enabled` on, `drill_config` `{"timerSeconds":75}`, `grouped` weight 0 outside the experiment, five metrics attached, Production bundle uses the Production key only.
+- **Enrolment probe:** 20 new probe identities (flag reads only, no events, so no exposures) all returned `in_experiment: true` for 567, split 10 control / 10 grouped. Link released for sharing after this check.
+- **Pilot skipped** to maximise data-collection time; the timer stays at the pre-registered 75 seconds.
