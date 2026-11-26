@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { Game } from './Game.tsx'
 import { generateIncident } from './game/generate.ts'
@@ -85,4 +85,17 @@ test('reloading this tab mid-round is abandoned, not "another tab"', () => {
   sessionStorage.setItem('rollback-drill:v1:this-tab-playing', '99')
   render(<Game mode={live} timerSeconds={75} LiveEvidence={Live} emit={vi.fn()} />)
   expect(screen.getByRole('heading', { name: /abandoned/i })).toBeInTheDocument()
+})
+
+test('the "another tab" screen clears once that round must be over', () => {
+  vi.useFakeTimers({ now: 1_000_000 })
+  try {
+    saveAttempt({ seed: 99, status: 'in-progress', startedAt: 1_000_000 - 20_000, ending: null, answerId: null, decisionMs: null, correct: false, counts: false, tabLeft: false })
+    render(<Game mode={live} timerSeconds={75} LiveEvidence={Live} emit={vi.fn()} />)
+    expect(screen.getByRole('heading', { name: /running in another tab/i })).toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(61_000))
+    expect(screen.getByRole('heading', { name: /abandoned/i })).toBeInTheDocument()
+  } finally {
+    vi.useRealTimers()
+  }
 })

@@ -23,7 +23,7 @@ interface ResultProps {
 
 function verdict(r: ResultSummary): { title: string; line: string; tone: 'good' | 'bad' | 'none' } {
   if (r.ending === 'timeout') return { title: 'PAGE TIMED OUT', line: 'No rollback in time. Orders kept failing.', tone: 'bad' }
-  if (r.ending === 'abandoned') return { title: 'DRILL ABANDONED', line: 'The page was left unfinished.', tone: 'none' }
+  if (r.ending === 'abandoned') return { title: 'DRILL ABANDONED', line: 'The round was left unfinished (reload or closed tab).', tone: 'none' }
   return r.correct
     ? { title: 'ROLLBACK CORRECT', line: 'Errors clearing. Orders are flowing again.', tone: 'good' }
     : { title: 'WRONG ROLLBACK', line: 'Errors continue at the failing restaurants.', tone: 'bad' }

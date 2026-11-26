@@ -35,13 +35,15 @@ export interface GameProps {
 
 const noop: EmitEvent = () => {}
 
-type LiveView = { kind: 'fresh' } | { kind: 'elsewhere' } | { kind: 'done'; attempt: AttemptRecord }
+type LiveView = { kind: 'fresh' } | { kind: 'elsewhere'; until: number } | { kind: 'done'; attempt: AttemptRecord }
 
 /** What a live tab should show, given what this browser has stored. */
 function liveView(limitMs: number): LiveView {
   const stored = loadAttempt()
   if (!stored) return { kind: 'fresh' }
-  if (!thisTabWasPlaying(stored.seed) && isRunningElsewhere(stored, Date.now(), limitMs)) return { kind: 'elsewhere' }
+  if (!thisTabWasPlaying(stored.seed) && isRunningElsewhere(stored, Date.now(), limitMs)) {
+    return { kind: 'elsewhere', until: (stored.startedAt ?? 0) + limitMs + 5000 }
+  }
   const resolved = resolveAbandoned(stored)
   if (resolved !== stored) saveAttempt(resolved)
   return { kind: 'done', attempt: resolved }
@@ -67,6 +69,14 @@ function LiveGame({ timerSeconds, LiveEvidence, emit }: GameProps) {
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
   }, [limitMs])
+
+  // If the other tab was closed mid-round, nothing will write to storage again: re-check once
+  // its time is up so this tab moves on to the (abandoned) result instead of waiting forever.
+  useEffect(() => {
+    if (view.kind !== 'elsewhere') return
+    const id = setTimeout(() => setView(liveView(limitMs)), Math.max(0, view.until - Date.now()) + 50)
+    return () => clearTimeout(id)
+  }, [view, limitMs])
 
   const onStart = useCallback(() => {
     // Re-check at the last moment: another tab may have used the attempt since this one loaded.
