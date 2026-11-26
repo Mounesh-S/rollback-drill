@@ -2,7 +2,8 @@
 
 Written and committed **before** the Production experiment starts. Git commit times can be set
 by the author, so the evidence is the time this file was **pushed to GitHub** (visible in the
-repository's commit history and Actions runs) before the experiment's `started_at` in Flagsmith.
+repository's Actions run history once the repository is public) before the experiment's
+`started_at` in Flagsmith.
 Any change is listed under "Amendments" with a reason.
 
 ## Question
@@ -32,8 +33,8 @@ could not work out. A positive result means "this way of presenting the evidence
 | Assignment | Flagsmith Experimentation, 100% rollout, 50/50 split |
 | Unit | One anonymous browser identity (random UUID; no personal data) |
 | Exposure | Recorded when the evidence screen first renders, after the player presses Start |
-| Incident | Unique per player (seeded), identical structure and difficulty for everyone. The culprit's time slot (oldest, middle, newest) and type are random, and every change reaches one silent restaurant, so no shortcut beats chance (tested) |
-| Evidence parity | Both layouts render exactly the same evidence; enforced by a CI test over 500 seeds |
+| Incident | Unique per player (seeded), identical structure and difficulty for everyone. The structure is symmetric (every pair of changes shares one restaurant, every change reaches one silent restaurant), time slots and change types are random, and ids carry no role, so guessing by timing, overlap or ids scores about 33% (tested over 20,000 incidents) |
+| Evidence parity | Both layouts render every change and signal, nothing invented or dropped; the treatment's only additions (repeated signals, derived status labels) are stated and checked by a CI test over 500 seeds |
 | Attempts | One live attempt per browser; reloads mid-round count as abandoned; a second tab cannot start another round or see the answer |
 
 ## Metrics
@@ -113,5 +114,8 @@ review. No real data existed at the time.
 3. **One attempt across tabs:** a second tab cannot start a live round or see the answer.
 4. **Self-report** became the informational metric `self_reported_help`.
 5. **Treatment described honestly** as grouping plus derived restaurant status.
-6. **Production experiment recreated** with five metrics: Flagsmith experiment **567**
+6. **Symmetric incident structure.** A second review found the culprit was the only change
+   overlapping both others. Both wrong changes now share a healthy restaurant, and restaurant and
+   signal ids no longer encode roles.
+7. **Production experiment recreated** with five metrics: Flagsmith experiment **567**
    (replacing the unstarted, empty 489, because metrics cannot be changed after creation).

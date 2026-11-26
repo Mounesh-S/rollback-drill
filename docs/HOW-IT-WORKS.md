@@ -7,13 +7,13 @@ question a judge might ask is answered by one of these files.
 
 - `rng.ts`: `mulberry32` turns a 32-bit seed into a repeatable stream of random numbers.
 - `generate.ts`: builds the incident from a seed and a scenario pack. Nine restaurants are picked:
-  2 failing, 4 healthy, 3 silent. Three changes are created:
+  2 failing, 4 healthy (one reached by two changes), 3 silent. Three changes are created:
   - **culprit**: reached both failing restaurants and one silent one;
-  - **wrong A**: reached failing A, one healthy and one silent;
-  - **wrong B**: reached failing B, one healthy and one silent.
-  The three time slots (oldest, middle, newest) and the three types (deploy, flag, config) are dealt
-  at random, so neither timing nor type gives the answer; the newest wrong change is a natural
-  recency trap. Tests check those shortcuts stay near chance.
+  - **wrong A**: reached failing A, a healthy restaurant and one silent;
+  - **wrong B**: reached failing B, the same healthy restaurant and one silent.
+  Every pair of changes shares exactly one restaurant, time slots and types are dealt at random,
+  and ids carry no role, so only the signals single out the culprit. Tests check that guessing by
+  timing, overlap or ids stays at chance (about 33%).
 - `solver.ts`: the rule a careful engineer uses. A change can be the cause only if it reached every
   failing restaurant and no healthy one. Tests prove exactly one change passes, for every seed.
 - `pack.ts` + `scenarios/*.json`: the content. A pack is plain JSON and validated.
