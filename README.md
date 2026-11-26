@@ -14,7 +14,7 @@ whether that layout helps people make the right call.
 Built for **[Toggle Wars: the Flagsmith Experimentation Hackathon](https://www.wemakedevs.org/hackathons/flagsmith)**,
 Track 01 *Test Something Real*.
 
-| | |
+| Resource | Link |
 |---|---|
 | **Play it** | https://rollback-drill-ebon.vercel.app |
 | **Try either layout (judges / practice, nothing recorded)** | [grouped](https://rollback-drill-ebon.vercel.app/?practice=1&layout=grouped&seed=4821) · [chronological](https://rollback-drill-ebon.vercel.app/?practice=1&layout=chronological&seed=4821) |
@@ -34,7 +34,7 @@ Rollback Drill turns that moment into a 75-second game and uses Flagsmith to tes
 
 ## The experiment
 
-| | |
+| Part | Design |
 |---|---|
 | **Hypothesis** | Showing evidence grouped by change, with the status of every restaurant each change reached, raises the share of correct first rollbacks |
 | **Control** | `chronological`: one time-ordered log, like most incident timelines |
