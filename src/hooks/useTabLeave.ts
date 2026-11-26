@@ -1,6 +1,9 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 
-/** Calls onLeave whenever the page becomes hidden while `active` is true. */
+/**
+ * Calls onLeave when the page is hidden or the window loses focus while `active` is true.
+ * Blur also catches a second window placed side by side, which never hides this one.
+ */
 export function useTabLeave(active: boolean, onLeave: () => void): void {
   const leave = useRef(onLeave)
   useLayoutEffect(() => {
@@ -9,10 +12,15 @@ export function useTabLeave(active: boolean, onLeave: () => void): void {
 
   useEffect(() => {
     if (!active) return
-    const handler = () => {
+    const onVisibility = () => {
       if (document.visibilityState === 'hidden') leave.current()
     }
-    document.addEventListener('visibilitychange', handler)
-    return () => document.removeEventListener('visibilitychange', handler)
+    const onBlur = () => leave.current()
+    document.addEventListener('visibilitychange', onVisibility)
+    window.addEventListener('blur', onBlur)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('blur', onBlur)
+    }
   }, [active])
 }

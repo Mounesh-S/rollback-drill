@@ -48,7 +48,7 @@ export function Intro({ timerSeconds, practice, onStart }: IntroProps) {
           </div>
           <div>
             <dt>FOCUS</dt>
-            <dd>Stay on this tab until you answer.</dd>
+            <dd>Stay in this window until you answer. Switching tabs or windows voids the attempt.</dd>
           </div>
           <div>
             <dt>HELP</dt>
