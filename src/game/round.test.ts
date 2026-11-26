@@ -56,3 +56,8 @@ describe('scoreRound', () => {
   test('timeout', () =>
     expect(scoreRound(run({ type: 'start', now: 0 }, { type: 'timeout' }), 'C')).toEqual({ correct: false, counts: false }))
 })
+
+test('an answer after the time limit counts as a timeout', () => {
+  const s = run({ type: 'start', now: 0, limitMs: 75_000 }, { type: 'select', changeId: 'A' }, { type: 'submit', now: 75_150 })
+  expect(s).toMatchObject({ phase: 'done', ending: 'timeout', answerId: null })
+})

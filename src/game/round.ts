@@ -9,6 +9,7 @@ export type Ending = 'answered' | 'timeout' | 'abandoned'
 export interface RoundState {
   phase: 'intro' | 'playing' | 'done'
   startedAt: number | null // clock ms when Start was pressed
+  limitMs: number // time allowed; a later submit counts as a timeout
   selectedId: string | null // change the player is about to roll back
   answerId: string | null // first and only submitted answer
   decisionMs: number | null
@@ -17,7 +18,7 @@ export interface RoundState {
 }
 
 export type RoundAction =
-  | { type: 'start'; now: number }
+  | { type: 'start'; now: number; limitMs?: number }
   | { type: 'select'; changeId: string }
   | { type: 'submit'; now: number }
   | { type: 'timeout' }
@@ -26,6 +27,7 @@ export type RoundAction =
 export const initialRound: RoundState = {
   phase: 'intro',
   startedAt: null,
+  limitMs: Number.POSITIVE_INFINITY,
   selectedId: null,
   answerId: null,
   decisionMs: null,
@@ -36,11 +38,14 @@ export const initialRound: RoundState = {
 export function roundReducer(state: RoundState, action: RoundAction): RoundState {
   switch (action.type) {
     case 'start':
-      return state.phase === 'intro' ? { ...state, phase: 'playing', startedAt: action.now } : state
+      return state.phase === 'intro'
+        ? { ...state, phase: 'playing', startedAt: action.now, limitMs: action.limitMs ?? Number.POSITIVE_INFINITY }
+        : state
     case 'select':
       return state.phase === 'playing' ? { ...state, selectedId: action.changeId } : state
     case 'submit':
       if (state.phase !== 'playing' || state.selectedId === null || state.startedAt === null) return state
+      if (action.now - state.startedAt > state.limitMs) return { ...state, phase: 'done', ending: 'timeout' }
       return {
         ...state,
         phase: 'done',
