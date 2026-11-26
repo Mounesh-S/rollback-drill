@@ -1,5 +1,5 @@
 import { beforeEach, expect, test, vi } from 'vitest'
-import { getPlayerId, loadAttempt, resolveAbandoned, saveAttempt, type AttemptRecord } from './storage.ts'
+import { getPlayerId, isRunningElsewhere, loadAttempt, resolveAbandoned, saveAttempt, type AttemptRecord } from './storage.ts'
 
 beforeEach(() => localStorage.clear())
 
@@ -46,4 +46,21 @@ test('blocked storage does not throw', () => {
   expect(() => saveAttempt(record)).not.toThrow()
   spy.mockRestore()
   vi.restoreAllMocks()
+})
+
+test('a just-started round counts as running elsewhere until its time is up', () => {
+  const started = { ...record, startedAt: 1_000_000 }
+  expect(isRunningElsewhere(started, 1_000_000 + 30_000, 75_000)).toBe(true)
+  expect(isRunningElsewhere(started, 1_000_000 + 81_000, 75_000)).toBe(false)
+  expect(isRunningElsewhere({ ...started, status: 'done' }, 1_000_100, 75_000)).toBe(false)
+})
+
+test('falls back to getRandomValues when randomUUID is unavailable', () => {
+  const original = crypto.randomUUID
+  Object.defineProperty(crypto, 'randomUUID', { value: undefined, configurable: true })
+  try {
+    expect(getPlayerId()).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
+  } finally {
+    Object.defineProperty(crypto, 'randomUUID', { value: original, configurable: true })
+  }
 })
