@@ -12,7 +12,8 @@
     "typecheck": "tsc -b",
     "check": "npm run typecheck && npm run lint && npm test",
     "validate-scenarios": "node scripts/validate-scenarios.ts",
-    "simulate": "node scripts/simulate.ts"
+    "simulate": "node scripts/simulate.ts",
+    "coverage": "vitest run --coverage --coverage.provider=v8 --coverage.include=src/** --coverage.exclude=**/*.test.*"
   },
   "dependencies": {
     "@flagsmith/flagsmith": "12.6.0",
@@ -28,6 +29,8 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "@vitest/coverage-v8": "3.2.4",
+    "axe-core": "4.14.0",
     "jsdom": "^26.1.0",
     "oxlint": "^1.90.0",
     "typescript": "~7.0.2",
