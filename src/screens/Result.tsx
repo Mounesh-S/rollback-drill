@@ -59,7 +59,7 @@ export function Result({ incident, result, practice, onSelfReport, onPractice }:
               <dd className="mono">{(result.decisionMs / 1000).toFixed(1)} s</dd>
             </div>
           )}
-          {culprit && (
+          {culprit && result.ending !== 'abandoned' && (
             <div>
               <dt>ACTUAL CAUSE</dt>
               <dd>
@@ -73,7 +73,7 @@ export function Result({ incident, result, practice, onSelfReport, onPractice }:
           {!practice && result.ending === 'answered' && (
             <div>
               <dt>COUNTS IN THE TEST</dt>
-              <dd>{result.tabLeft ? 'No. You left the tab during the drill.' : 'Yes.'}</dd>
+              <dd>{result.tabLeft ? 'No. You left the drill window during the round.' : 'Yes.'}</dd>
             </div>
           )}
         </dl>

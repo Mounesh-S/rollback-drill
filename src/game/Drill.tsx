@@ -21,7 +21,8 @@ export interface DrillProps {
   renderEvidence: (incident: Incident) => ReactNode
   emit: EmitEvent
   clock?: () => number
-  onStart?: () => void
+  /** Return false to refuse the start (e.g. another tab already used the attempt). */
+  onStart?: () => boolean | void
   onDone?: (state: RoundState, score: RoundScore) => void
   onPractice?: () => void
 }
@@ -45,7 +46,9 @@ export function Drill({
   // Answer order is shuffled per incident, independent of the change timeline.
   const choices = useMemo(() => shuffle(mulberry32(incident.seed ^ 0x9e3779b9), incident.changes), [incident])
 
-  const msLeft = useCountdown(state.startedAt, timerSeconds * 1000, clock, () => dispatch({ type: 'timeout' }))
+  const msLeft = useCountdown(state.phase === 'playing' ? state.startedAt : null, timerSeconds * 1000, clock, () =>
+    dispatch({ type: 'timeout' }),
+  )
 
   useTabLeave(state.phase === 'playing', () => {
     dispatch({ type: 'tabLeft' })
@@ -68,9 +71,9 @@ export function Drill({
   }, [state, incident.culpritId, emit, onDone])
 
   const start = useCallback(() => {
-    dispatch({ type: 'start', now: clock() })
-    onStart?.()
-  }, [clock, onStart])
+    if (onStart?.() === false) return
+    dispatch({ type: 'start', now: clock(), limitMs: timerSeconds * 1000 })
+  }, [clock, onStart, timerSeconds])
 
   if (state.phase === 'intro') return <Intro timerSeconds={timerSeconds} practice={practice} onStart={start} />
 

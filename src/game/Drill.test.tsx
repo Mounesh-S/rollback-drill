@@ -79,7 +79,7 @@ test('leaving the tab is reported once and voids the primary metric', () => {
   fireEvent(document, new Event('visibilitychange'))
   answer(incident.culpritId, 10_000)
   expect(names(emit)).toEqual([EVENT.tabLeft, EVENT.decisionSubmitted])
-  expect(screen.getByText(/left the tab/i)).toBeInTheDocument()
+  expect(screen.getByText(/left the drill window/i)).toBeInTheDocument()
 })
 
 test('time running out ends the round with no events', () => {
@@ -133,4 +133,19 @@ test('Enter starts the drill from the intro', () => {
   setup()
   fireEvent.keyDown(window, { key: 'Enter' })
   expect(screen.getByTestId('evidence')).toBeInTheDocument()
+})
+
+test('losing window focus (side-by-side window) voids the primary metric', () => {
+  const { emit } = setup()
+  start()
+  fireEvent.blur(window)
+  answer(incident.culpritId, 10_000)
+  expect(names(emit)).toEqual([EVENT.tabLeft, EVENT.decisionSubmitted])
+})
+
+test('a refused start keeps the intro and sends nothing', () => {
+  const { emit } = setup({ onStart: () => false })
+  start()
+  expect(screen.queryByTestId('evidence')).toBeNull()
+  expect(emit).not.toHaveBeenCalled()
 })
