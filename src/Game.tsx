@@ -1,7 +1,7 @@
 // Decides which round to play. Live: one attempt per browser, remembered across reloads.
 // Practice: unlimited rounds, chosen layout, nothing recorded or sent.
 
-import { useCallback, useState, type ComponentType } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from 'react'
 import { Drill } from './game/Drill.tsx'
 import type { EmitEvent } from './game/events.ts'
 import { generateIncident } from './game/generate.ts'
@@ -12,8 +12,18 @@ import type { Incident } from './game/types.ts'
 import { Chronological } from './layouts/Chronological.tsx'
 import { Grouped } from './layouts/Grouped.tsx'
 import { practiceUrl, type Mode } from './lib/mode.ts'
-import { loadAttempt, resolveAbandoned, saveAttempt, type AttemptRecord } from './lib/storage.ts'
+import {
+  ATTEMPT_KEY,
+  isRunningElsewhere,
+  loadAttempt,
+  markThisTabPlaying,
+  resolveAbandoned,
+  saveAttempt,
+  thisTabWasPlaying,
+  type AttemptRecord,
+} from './lib/storage.ts'
 import { Result } from './screens/Result.tsx'
+import { Status } from './screens/Status.tsx'
 
 export interface GameProps {
   mode: Mode
@@ -25,12 +35,16 @@ export interface GameProps {
 
 const noop: EmitEvent = () => {}
 
-function initialAttempt(): AttemptRecord | null {
+type LiveView = { kind: 'fresh' } | { kind: 'elsewhere' } | { kind: 'done'; attempt: AttemptRecord }
+
+/** What a live tab should show, given what this browser has stored. */
+function liveView(limitMs: number): LiveView {
   const stored = loadAttempt()
-  if (!stored) return null
+  if (!stored) return { kind: 'fresh' }
+  if (!thisTabWasPlaying(stored.seed) && isRunningElsewhere(stored, Date.now(), limitMs)) return { kind: 'elsewhere' }
   const resolved = resolveAbandoned(stored)
   if (resolved !== stored) saveAttempt(resolved)
-  return resolved
+  return { kind: 'done', attempt: resolved }
 }
 
 export function Game(props: GameProps) {
@@ -38,16 +52,43 @@ export function Game(props: GameProps) {
 }
 
 function LiveGame({ timerSeconds, LiveEvidence, emit }: GameProps) {
-  const [attempt] = useState(initialAttempt)
-  const [seed] = useState(() => attempt?.seed ?? newSeed())
-  const incident = generateIncident(seed, DEFAULT_PACK)
+  const limitMs = timerSeconds * 1000
+  const [view, setView] = useState(() => liveView(limitMs))
+  const [seed] = useState(() => (view.kind === 'done' ? view.attempt.seed : newSeed()))
+  const incident = useMemo(() => generateIncident(view.kind === 'done' ? view.attempt.seed : seed, DEFAULT_PACK), [view, seed])
   const goPractice = () => location.assign(practiceUrl())
+  const playing = useRef(false)
 
-  const onStart = useCallback(
-    () =>
-      saveAttempt({ seed, status: 'in-progress', ending: null, answerId: null, decisionMs: null, correct: false, counts: false, tabLeft: false }),
-    [seed],
-  )
+  // Another tab started or finished the attempt: follow it, unless this tab is the one playing.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === ATTEMPT_KEY && !playing.current) setView(liveView(limitMs))
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [limitMs])
+
+  const onStart = useCallback(() => {
+    // Re-check at the last moment: another tab may have used the attempt since this one loaded.
+    if (loadAttempt()) {
+      setView(liveView(limitMs))
+      return false
+    }
+    playing.current = true
+    markThisTabPlaying(seed)
+    saveAttempt({
+      seed,
+      status: 'in-progress',
+      startedAt: Date.now(),
+      ending: null,
+      answerId: null,
+      decisionMs: null,
+      correct: false,
+      counts: false,
+      tabLeft: false,
+    })
+  }, [seed, limitMs])
+
   const onDone = useCallback(
     (state: RoundState, score: RoundScore) =>
       saveAttempt({
@@ -63,9 +104,17 @@ function LiveGame({ timerSeconds, LiveEvidence, emit }: GameProps) {
     [seed],
   )
 
+  if (view.kind === 'elsewhere') {
+    return (
+      <Status label="IN PROGRESS" title="Your drill is running in another tab">
+        <p>Finish it there. This tab will show your result when it's done.</p>
+      </Status>
+    )
+  }
+
   // Returning player: show their result, never a second live round.
-  if (attempt?.status === 'done') {
-    return <Result incident={incident} result={attempt} practice={false} onPractice={goPractice} />
+  if (view.kind === 'done') {
+    return <Result incident={incident} result={view.attempt} practice={false} onPractice={goPractice} />
   }
 
   return (
@@ -84,7 +133,7 @@ function LiveGame({ timerSeconds, LiveEvidence, emit }: GameProps) {
 
 function PracticeGame({ mode, timerSeconds }: GameProps) {
   const [round, setRound] = useState(() => ({ key: 0, seed: mode.seed ?? newSeed() }))
-  const incident = generateIncident(round.seed, DEFAULT_PACK)
+  const incident = useMemo(() => generateIncident(round.seed, DEFAULT_PACK), [round.seed])
   const Layout = mode.layout === 'grouped' ? Grouped : Chronological
 
   return (

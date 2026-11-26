@@ -5,7 +5,10 @@ import { generateIncident } from './game/generate.ts'
 import { DEFAULT_PACK } from './game/packs.ts'
 import { loadAttempt, saveAttempt } from './lib/storage.ts'
 
-beforeEach(() => localStorage.clear())
+beforeEach(() => {
+  localStorage.clear()
+  sessionStorage.clear()
+})
 afterEach(cleanup)
 
 const Live = () => <div data-testid="live-evidence" />
@@ -34,11 +37,12 @@ test('a returning player sees their result, not a new round', () => {
   expect(screen.getByRole('heading', { name: /wrong rollback/i })).toBeInTheDocument()
 })
 
-test('reloading mid-round counts as abandoned', () => {
+test('reloading mid-round counts as abandoned, without revealing the cause', () => {
   saveAttempt({ seed: 99, status: 'in-progress', ending: null, answerId: null, decisionMs: null, correct: false, counts: false, tabLeft: false })
   render(<Game mode={live} timerSeconds={75} LiveEvidence={Live} emit={vi.fn()} />)
   expect(screen.getByRole('heading', { name: /abandoned/i })).toBeInTheDocument()
   expect(loadAttempt()?.ending).toBe('abandoned')
+  expect(screen.queryByText(/actual cause/i)).toBeNull()
 })
 
 test('practice mode uses the chosen layout, records nothing and sends nothing', () => {
@@ -54,4 +58,31 @@ test('practice mode uses the chosen layout, records nothing and sends nothing', 
   expect(loadAttempt()).toBeNull()
   fireEvent.click(screen.getByRole('button', { name: /practice incident/i }))
   expect(screen.getByRole('button', { name: /start/i })).toBeInTheDocument()
+})
+
+test('a round running in another tab is not revealed or restartable', () => {
+  saveAttempt({ seed: 99, status: 'in-progress', startedAt: Date.now() - 5_000, ending: null, answerId: null, decisionMs: null, correct: false, counts: false, tabLeft: false })
+  render(<Game mode={live} timerSeconds={75} LiveEvidence={Live} emit={vi.fn()} />)
+  expect(screen.getByRole('heading', { name: /running in another tab/i })).toBeInTheDocument()
+  expect(screen.queryByText(/actual cause/i)).toBeNull()
+  expect(screen.queryByRole('button', { name: /start/i })).toBeNull()
+  expect(loadAttempt()?.status).toBe('in-progress')
+})
+
+test('a second tab cannot start once another tab used the attempt', () => {
+  const emit = vi.fn()
+  render(<Game mode={live} timerSeconds={75} LiveEvidence={Live} emit={emit} />)
+  // Meanwhile, another tab finishes its round.
+  saveAttempt({ seed: 7, status: 'done', ending: 'answered', answerId: 'CHG-1', decisionMs: 1000, correct: false, counts: false, tabLeft: false })
+  fireEvent.click(screen.getByRole('button', { name: /start/i }))
+  expect(screen.queryByTestId('live-evidence')).toBeNull()
+  expect(screen.getByRole('heading', { name: /wrong rollback/i })).toBeInTheDocument()
+  expect(emit).not.toHaveBeenCalled()
+})
+
+test('reloading this tab mid-round is abandoned, not "another tab"', () => {
+  saveAttempt({ seed: 99, status: 'in-progress', startedAt: Date.now() - 5_000, ending: null, answerId: null, decisionMs: null, correct: false, counts: false, tabLeft: false })
+  sessionStorage.setItem('rollback-drill:v1:this-tab-playing', '99')
+  render(<Game mode={live} timerSeconds={75} LiveEvidence={Live} emit={vi.fn()} />)
+  expect(screen.getByRole('heading', { name: /abandoned/i })).toBeInTheDocument()
 })
