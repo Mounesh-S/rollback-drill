@@ -20,13 +20,13 @@ export function Grouped({ incident }: { incident: Incident }) {
             <div className="grp-head">
               <ChangeHeader change={change} />
             </div>
-            <h3 className="grp-label">REACHED</h3>
+            <h2 className="grp-label">REACHED</h2>
             <ul className="tree">
               {change.targets.map((id) => (
                 <TargetStatus key={id} restaurant={getRestaurant(incident, id)} status={status.get(id) ?? 'no-signal'} />
               ))}
             </ul>
-            <h3 className="grp-label">SIGNALS FROM THESE RESTAURANTS</h3>
+            <h2 className="grp-label">SIGNALS FROM THESE RESTAURANTS</h2>
             <ul className="grp-sigs">
               {signals.map((s) => (
                 <SignalRow key={s.id} signal={s} restaurant={getRestaurant(incident, s.restaurantId)} />
@@ -38,7 +38,7 @@ export function Grouped({ incident }: { incident: Incident }) {
 
       {unrelated.length > 0 && (
         <section className="grp" aria-label="Restaurants not reached by any change">
-          <h3 className="grp-label">NOT REACHED BY ANY CHANGE</h3>
+          <h2 className="grp-label">NOT REACHED BY ANY CHANGE</h2>
           <ul className="grp-sigs">
             {unrelated.map((s) => (
               <SignalRow key={s.id} signal={s} restaurant={getRestaurant(incident, s.restaurantId)} />
