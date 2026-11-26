@@ -1,11 +1,13 @@
 // Builds one incident from a seed. Every incident has the same shape and difficulty:
 //
-//   culprit       targets both failing restaurants + 1 quiet one      (the right answer)
-//   recency trap  shipped closest to onset; 1 failing + 2 healthy     (tempting, wrong)
-//   old decoy     shipped earlier;          1 failing + 2 healthy     (wrong)
+//   culprit   reached both failing restaurants + 1 silent one        (the right answer)
+//   wrong A   reached failing A + 1 healthy + 1 silent               (wrong)
+//   wrong B   reached failing B + 1 healthy + 1 silent               (wrong)
 //
-// Only the culprit covers every failing restaurant and no healthy one. In a time-ordered
-// feed the recency trap looks guilty; grouping by change makes the scope mismatch visible.
+// Only the culprit covers every failing restaurant and no healthy one. Each change is placed
+// at random in the oldest, middle or newest time slot, so timing alone never gives the answer
+// (the newest wrong change is a natural recency trap). Every change reaches a silent
+// restaurant, so "the one with no signal" is not a shortcut either.
 
 import type { ScenarioPack } from './pack.ts'
 import { RESTAURANTS_PER_INCIDENT } from './pack.ts'
@@ -36,22 +38,22 @@ export function generateIncident(seed: number, pack: ScenarioPack): Incident {
   const restaurants: Restaurant[] = shuffle(rng, pack.restaurants)
     .slice(0, RESTAURANTS_PER_INCIDENT)
     .map((r, i) => ({ id: `r${i + 1}`, name: r.name, area: r.area }))
-  const [failA, failB, ok1, ok2, ok3, ok4, quiet, extra1, extra2] = restaurants as [
+  const [failA, failB, ok1, ok2, quiet1, quiet2, quiet3, extra1, extra2] = restaurants as [
     Restaurant, Restaurant, Restaurant, Restaurant, Restaurant, Restaurant, Restaurant, Restaurant, Restaurant,
   ]
 
-  // Times in minutes since midnight. Errors start at `onset`.
+  // Times in minutes since midnight. Errors start at `onset`. The three time slots are
+  // dealt to the three changes at random.
   const onset = randInt(rng, 9 * 60, 21 * 60)
-  const culpritAt = onset - randInt(rng, 6, 9)
-  const trapAt = onset - randInt(rng, 1, 3)
-  const decoyAt = onset - randInt(rng, 14, 25)
+  const slots = shuffle(rng, [onset - randInt(rng, 14, 25), onset - randInt(rng, 6, 9), onset - randInt(rng, 1, 3)])
+  const [culpritAt, wrongAAt, wrongBAt] = slots as [number, number, number]
 
-  // The culprit's kind varies, so a leaked answer like "it's always the flag" is useless.
-  const [culpritKind, trapKind, decoyKind] = shuffle(rng, CHANGE_KINDS) as [ChangeKind, ChangeKind, ChangeKind]
+  // The culprit's kind varies too, so "it's always the flag" is useless.
+  const [culpritKind, wrongAKind, wrongBKind] = shuffle(rng, CHANGE_KINDS) as [ChangeKind, ChangeKind, ChangeKind]
   const ids = new Set<string>()
-  const culprit = makeChange(rng, pack, culpritKind, culpritAt, shuffle(rng, [failA, failB, quiet]), ids)
-  const trap = makeChange(rng, pack, trapKind, trapAt, shuffle(rng, [failA, ok1, ok2]), ids)
-  const decoy = makeChange(rng, pack, decoyKind, decoyAt, shuffle(rng, [failB, ok3, ok4]), ids)
+  const culprit = makeChange(rng, pack, culpritKind, culpritAt, shuffle(rng, [failA, failB, quiet1]), ids)
+  const wrongA = makeChange(rng, pack, wrongAKind, wrongAAt, shuffle(rng, [failA, ok1, quiet2]), ids)
+  const wrongB = makeChange(rng, pack, wrongBKind, wrongBAt, shuffle(rng, [failB, ok2, quiet3]), ids)
 
   // One consistent symptom per incident, like a real outage.
   const symptom = pick(rng, pack.errorMessages)
@@ -68,7 +70,8 @@ export function generateIncident(seed: number, pack: ScenarioPack): Incident {
     signal('error', onset + 1, failB),
     signal('error', onset + 2, failA),
     signal('error', onset + 3, failB),
-    ...shuffle(rng, [ok1, ok2, ok3, ok4, extra1, extra2]).map((r, i) => signal('healthy', onset + 1 + (i % 4), r)),
+    // Each reached healthy restaurant reports twice; two unreached ones report once.
+    ...shuffle(rng, [ok1, ok1, ok2, ok2, extra1, extra2]).map((r, i) => signal('healthy', onset + 1 + (i % 4), r)),
   ].sort((a, b) => a.at - b.at || a.id.localeCompare(b.id))
 
   return {
@@ -79,7 +82,7 @@ export function generateIncident(seed: number, pack: ScenarioPack): Incident {
     headline: pick(rng, pack.headlines),
     onset,
     restaurants,
-    changes: [decoy, culprit, trap], // already chronological: decoyAt < culpritAt < trapAt
+    changes: [culprit, wrongA, wrongB].sort((a, b) => a.at - b.at),
     signals,
     culpritId: culprit.id,
   }

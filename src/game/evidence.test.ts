@@ -3,11 +3,11 @@ import { getRestaurant, restaurantStatus } from './evidence.ts'
 import { generateIncident } from './generate.ts'
 import { DEFAULT_PACK } from './packs.ts'
 
-test('every incident has 2 failing, 6 healthy and 1 silent restaurant', () => {
+test('every incident has 2 failing, 4 healthy and 3 silent restaurants', () => {
   for (let seed = 1; seed <= 300; seed++) {
     const counts = { failing: 0, healthy: 0, 'no-signal': 0 }
     for (const s of restaurantStatus(generateIncident(seed, DEFAULT_PACK)).values()) counts[s]++
-    expect(counts).toEqual({ failing: 2, healthy: 6, 'no-signal': 1 })
+    expect(counts).toEqual({ failing: 2, healthy: 4, 'no-signal': 3 })
   }
 })
 

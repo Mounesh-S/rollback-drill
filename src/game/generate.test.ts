@@ -33,18 +33,44 @@ describe.each(PACKS.map((p) => [p.id, p] as const))('pack %s', (_id, pack) => {
       expect(healthy).toHaveLength(6)
       expect(new Set(evidenceIds(inc)).size).toBe(evidenceIds(inc).length)
 
-      // Chronological order, and the trap (last change) is closest to onset but before it.
+      // Chronological order, all changes before the errors start.
       const times = inc.changes.map((c) => c.at)
       expect(times).toEqual([...times].sort((a, b) => a - b))
-      const trap = inc.changes[2]!
-      expect(trap.id).not.toBe(inc.culpritId)
-      expect(trap.at).toBeLessThan(inc.onset)
-      expect(trap.targets.some((id) => errors.some((e) => e.restaurantId === id))).toBe(true)
+      expect(Math.max(...times)).toBeLessThan(inc.onset)
 
       // Everything happens on the same day.
       for (const t of [...times, ...inc.signals.map((s) => s.at)]) {
         expect(t).toBeGreaterThanOrEqual(0)
         expect(t).toBeLessThan(24 * 60)
+      }
+    }
+  })
+
+  test('no shortcut beats reading the evidence', () => {
+    // Accuracy of lazy strategies over many incidents. Each should be close to chance (1/3).
+    const silent = (inc: ReturnType<typeof generateIncident>, id: string) =>
+      !inc.signals.some((s) => s.restaurantId === id)
+    const strategies: Record<string, (inc: ReturnType<typeof generateIncident>) => string> = {
+      newest: (inc) => inc.changes[2]!.id,
+      middle: (inc) => inc.changes[1]!.id,
+      oldest: (inc) => inc.changes[0]!.id,
+      'reached a silent restaurant': (inc) => inc.changes.find((c) => c.targets.some((t) => silent(inc, t)))!.id,
+    }
+    for (const [name, pickChange] of Object.entries(strategies)) {
+      const hits = SEEDS.filter((seed) => {
+        const inc = generateIncident(seed, pack)
+        return pickChange(inc) === inc.culpritId
+      }).length
+      expect(hits / SEEDS.length, name).toBeLessThan(0.42)
+    }
+  })
+
+  test('every change reaches exactly one silent restaurant', () => {
+    for (const seed of SEEDS.slice(0, 300)) {
+      const inc = generateIncident(seed, pack)
+      for (const c of inc.changes) {
+        const silentTargets = c.targets.filter((t) => !inc.signals.some((s) => s.restaurantId === t))
+        expect(silentTargets).toHaveLength(1)
       }
     }
   })
