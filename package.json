@@ -14,7 +14,8 @@
     "validate-scenarios": "node scripts/validate-scenarios.ts",
     "simulate": "node scripts/simulate.ts",
     "coverage": "vitest run --coverage --coverage.provider=v8 --coverage.include=src/** --coverage.exclude=**/*.test.*",
-    "srm": "node scripts/srm.ts"
+    "srm": "node scripts/srm.ts",
+    "report": "node scripts/report.ts"
   },
   "dependencies": {
     "@flagsmith/flagsmith": "12.6.0",
