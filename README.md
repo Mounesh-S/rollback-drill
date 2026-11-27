@@ -142,6 +142,7 @@ Set up the flags, metrics and experiment with the commands in
 | `npm run coverage` | Test coverage report |
 | `SIM_ENV_KEY=<dev key> npm run simulate -- --run aa-1 --users 400 --control 0.5 --treatment 0.5` | Simulated players through the real SDK (Development only) |
 | `npm run srm -- results.json` | Sample-ratio-mismatch check on exported results |
+| `npm run report -- results.json` | Results table and the verdict from the pre-registered decision rule |
 
 ## Run this drill with your own team
 

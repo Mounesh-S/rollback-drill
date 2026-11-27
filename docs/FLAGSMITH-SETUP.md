@@ -43,6 +43,7 @@ curl -s "https://edge.api.flagsmith.com/api/v1/identities/?identifier=probe-$(da
 flagsmith api api/v1/environments/<ENV>/experiments/<id>/results/refresh/ -X POST
 flagsmith api api/v1/environments/<ENV>/experiments/<id>/results/ > results.json
 npm run srm -- results.json
+npm run report -- results.json > docs/RESULTS.md   # applies the pre-registered decision rule
 
 # 6. End: keep control, or roll the winning variant out to everyone
 echo '{"rollout_decision":"control"}' | flagsmith api api/v1/environments/<ENV>/experiments/<id>/complete/ -X POST --input -
