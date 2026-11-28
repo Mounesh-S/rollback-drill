@@ -158,11 +158,17 @@ Set up the flags, metrics and experiment with the commands in
 | `npm run srm -- results.json` | Sample-ratio-mismatch check on exported results |
 | `npm run report -- results.json` | Results table and the verdict from the pre-registered decision rule |
 
-## Run this drill with your own team
+## Who uses this and how
+
+| Who | How they use it |
+|---|---|
+| **SRE and platform teams** | Run the drill with a new on-call rotation as onboarding: 75 seconds per round, a unique incident each time, and a report that shows whether people pick the right rollback |
+| **Teams building incident tooling** | Test their own dashboard layout the same way: put the old and new screen behind one Flagsmith flag, measure correct first rollbacks, and ship the new screen only if the data says so |
+| **Anyone running an A/B test** | Reuse the method: pre-registration, an A/A check, a known-effect check, a sample ratio check and a mechanical decision rule (`npm run report`) |
 
 Incidents come from plain JSON **scenario packs** in [scenarios/](scenarios/): services, tenants,
-change titles and symptoms. Write a pack, run `npm run validate-scenarios`, and register it in
-`src/game/packs.ts`. See [scenarios/README.md](scenarios/README.md).
+change titles and symptoms. Write a pack for your own systems, run `npm run validate-scenarios`, and
+register it in `src/game/packs.ts`. See [scenarios/README.md](scenarios/README.md).
 
 ## Project layout
 
