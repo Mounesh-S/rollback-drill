@@ -18,7 +18,8 @@ Track 01 *Test Something Real*.
 |---|---|
 | **Play it** | https://rollback-drill-ebon.vercel.app |
 | **Try either layout (judges / practice, nothing recorded)** | [grouped](https://rollback-drill-ebon.vercel.app/?practice=1&layout=grouped&seed=4821) · [chronological](https://rollback-drill-ebon.vercel.app/?practice=1&layout=chronological&seed=4821) |
-| **Demo video** | _Added on Nov 29 with the final results_ |
+| **Demo video** | _YouTube link added after upload_ |
+| **Results** | [docs/RESULTS.md](docs/RESULTS.md) |
 | **Pre-registered plan** | [docs/PREREGISTRATION.md](docs/PREREGISTRATION.md) |
 
 ![The intro screen: an incoming SEV2 page](docs/images/intro.jpg)
@@ -54,11 +55,24 @@ rule and limitations were committed before launch: [docs/PREREGISTRATION.md](doc
 
 ## Results
 
-**Live now:** Flagsmith experiment 567 started on Nov 26, 2026 at 21:17 IST and collects data until
-Nov 29, 2026, 12:00 IST. Real-player results, the verdict and the rollout decision will be published
-here. Code is frozen at tag [`experiment-v1`](https://github.com/Mounesh-S/rollback-drill/tree/experiment-v1).
+Flagsmith experiment 567 has run in Production with real players since Nov 26, 2026, 21:17 IST.
+Code is frozen at tag [`experiment-v1`](https://github.com/Mounesh-S/rollback-drill/tree/experiment-v1).
+Full table, raw export and reasoning: [docs/RESULTS.md](docs/RESULTS.md).
 
-Before launch, the whole pipeline was validated with simulated players in a separate Development
+| Real players (Nov 28, 21:23 IST) | `chronological` (control) | `grouped` (treatment) |
+|---|---|---|
+| Players exposed | 5 | 10 |
+| Correct first rollback (primary) | 2/5 (40%) | 2/10 (20%) |
+| Answered in time (guardrail) | 4/5 (80%) | 4/10 (40%) |
+| Left the window (guardrail) | 1/5 (20%) | 3/10 (30%) |
+| Sample ratio check | p = 0.197, balanced | |
+
+**Verdict by the pre-registered rule: not enough data, keep `chronological`.** The rule needs at
+least 50 players per arm. Below that, any difference is noise, and calling a winner (or a loser)
+would be a guess. The window closes on Nov 29, 12:00 IST, when the experiment is completed in
+Flagsmith with `rollout_decision: control`. `npm run report` applies the rule to any export.
+
+The method itself was proven before launch with 400 simulated players in a separate Development
 environment ([docs/VALIDATION.md](docs/VALIDATION.md)):
 
 | Validation run | What it proves | Outcome |
@@ -165,6 +179,7 @@ docs/          pre-registration, Flagsmith setup, validation, decision log, how 
 
 | Document | What's in it |
 |---|---|
+| [RESULTS.md](docs/RESULTS.md) | Real-player results, the verdict and the decision |
 | [PREREGISTRATION.md](docs/PREREGISTRATION.md) | Hypothesis, metrics, sample size, stopping and decision rules, amendments |
 | [FLAGSMITH-SETUP.md](docs/FLAGSMITH-SETUP.md) | Exact CLI and API commands |
 | [VALIDATION.md](docs/VALIDATION.md) | A/A, known-effect and rollout tests, with raw Flagsmith results |
